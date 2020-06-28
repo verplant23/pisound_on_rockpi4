@@ -10,6 +10,7 @@ https://blokas.io/
 https://wiki.radxa.com/Rockpi4
 https://www.armbian.com/download/
 
+This is Armbian dev build on mainline kernel 5.6.19
 
 Easy rebuild Kernel/System with these Patches on armbian-buildsystem, or get the debs and install them to your prebuild downloaded from armbian.
 

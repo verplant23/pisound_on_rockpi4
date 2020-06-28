@@ -7,7 +7,9 @@ Thanks to pisound team for such a wonderful piece of hardware and making the ste
 
 
 https://blokas.io/
+
 https://wiki.radxa.com/Rockpi4
+
 https://www.armbian.com/download/
 
 This is Armbian dev build on mainline kernel 5.6.19

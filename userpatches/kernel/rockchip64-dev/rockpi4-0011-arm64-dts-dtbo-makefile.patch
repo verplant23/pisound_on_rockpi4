@@ -1,0 +1,17 @@
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/Makefile b/arch/arm64/boot/dts/rockchip/overlay/Makefile
+index c5f52da3a..89d543f4d 100644
+--- a/arch/arm64/boot/dts/rockchip/overlay/Makefile
++++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile
+@@ -5,8 +5,11 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rockchip-pcie-gen2.dtbo \
+ 	rockchip-spi-jedec-nor.dtbo \
+ 	rockchip-spi-spidev.dtbo \
++	rockchip-spi1.dtbo \
+ 	rockchip-uart4.dtbo \
+-	rockchip-w1-gpio.dtbo
++	rockchip-w1-gpio.dtbo \
++	audioinjector-wm8731-audio.dtbo \
++	pisound.dtbo 
+ 
+ scr-$(CONFIG_ARCH_ROCKCHIP) += \
+        rockchip-fixup.scr

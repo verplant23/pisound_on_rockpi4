@@ -1,0 +1,171 @@
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dts b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dts
+index ff890a36d..f4152710c 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dts
+@@ -17,6 +17,11 @@ / {
+ 	chosen {
+ 		stdout-path = "serial2:1500000n8";
+ 	};
++	
++	aliases {
++		spi1 = &spi1;
++		i2s1 = &i2s1;
++	};
+ 
+ 	clkin_gmac: external-gmac-clock {
+ 		compatible = "fixed-clock";
+@@ -36,6 +41,7 @@ sdio_pwrseq: sdio-pwrseq {
+ 
+ 	sound {
+ 		compatible = "audio-graph-card";
++		status = "okay";
+ 		label = "rockchip,rk3399";
+ 		dais = <&i2s0_p0>;
+ 	};
+@@ -154,10 +160,44 @@ power-status {
+ 		system-status {
+ 			label = "status";
+ 			gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_HIGH>;
+-			linux,default-trigger = "heartbeat";
++			linux,default-trigger = "mmc0";
+ 		};
+ 	};
++	
++	sound_ext_card: sound-ext-card {
++			i2s-controller = <&i2s1>;
++			status = "disabled";
++		};	
++/*
++	sound_ext_card: sound-ext-card {
++			compatible = "blokaslabs,pisound";
++			i2s-controller = <&i2s1>;
++			status = "okay";
++
++			pinctrl-names = "default";
++			pinctrl-0 = <&pisound_pins>;
++
++			osr-gpios = 	
++					<&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>,
++					<&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>,
++					<&gpio4 RK_PA4 GPIO_ACTIVE_HIGH>; 
++
++			reset-gpios =	
++					<&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>,
++					<&gpio4 RK_PD4 GPIO_ACTIVE_HIGH>;
++
++			data_available-gpios = <&gpio4 RK_PD5 GPIO_ACTIVE_HIGH>;
++
++			button-gpios = <&gpio4 RK_PC2 GPIO_ACTIVE_LOW>;
++		};
++
++	pcm5102a_codec: pcm5102a-codec {
++			#sound-dai-cells = <0>;
++			compatible = "ti,pcm5102a";
++			status = "okay";
+ 
++	};
++*/
+ };
+ 
+ &cpu_l0 {
+@@ -217,11 +257,7 @@ &hdmi {
+ };
+ 
+ &hdmi_sound {
+-	status = "okay";
+-};
+-
+-&hdmi_sound {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &i2c0 {
+@@ -507,8 +543,13 @@ i2s0_p0_0: endpoint {
+ };
+ 
+ &i2s1 {
++	clock-names = "i2s_clk", "i2s_hclk";
++	clocks = <&cru SCLK_I2S1_8CH>, <&cru HCLK_I2S1_8CH>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2s1_2ch_bus>;
+ 	rockchip,playback-channels = <2>;
+ 	rockchip,capture-channels = <2>;
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+ };
+ 
+@@ -661,6 +702,51 @@ i2s_8ch_mclk: i2s-8ch-mclk {
+ 			rockchip,pins = <4 0 RK_FUNC_1 &pcfg_pull_none>;
+ 		};
+ 	};
++	
++	spi1 {
++		spi1_clk: spi1-clk {
++			rockchip,pins =
++				<1 RK_PB1 2 &pcfg_pull_up>;
++		};
++
++		cs_gpio: cs-gpio {
++			rockchip,pins = 
++				<1 RK_PB2 2 &pcfg_pull_up>;
++		};
++
++		spi1_rx: spi1-rx {
++			rockchip,pins =
++				<1 RK_PA7 2 &pcfg_pull_up>;
++		};
++		spi1_tx: spi1-tx {
++			rockchip,pins =
++				<1 RK_PB0 2 &pcfg_pull_up>;
++		};
++	};
++
++	i2s1 {
++		i2s1_2ch_bus: i2s1-2ch-bus {
++			rockchip,pins =
++				<4 3 RK_FUNC_1 &pcfg_pull_none>,
++				<4 5 RK_FUNC_1 &pcfg_pull_none>,
++				<4 6 RK_FUNC_1 &pcfg_pull_none>,
++				<4 7 RK_FUNC_1 &pcfg_pull_none>;			
++		};
++	};
++/*	
++	sound-ext-card {
++		pisound_pins: pisound_pins {
++			rockchip,pins =
++				<2 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>,	
++				<4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>,
++				<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++*/
+ };
+ 
+ &pwm2 {
+@@ -779,6 +865,20 @@ bluetooth {
+ 	};
+ };
+ 
++&spi1 {
++		compatible = "rockchip,rk3399-spi", "rockchip,rk3066-spi";
++		clocks = <&cru SCLK_SPI1>, <&cru PCLK_SPI1>;
++		clock-names = "spiclk", "apb_pclk";
++		interrupts = <GIC_SPI 53 IRQ_TYPE_LEVEL_HIGH 0>;
++		dmas = <&dmac_peri 12>, <&dmac_peri 13>;
++		dma-names = "tx", "rx";
++		pinctrl-names = "default";
++		pinctrl-0 = <&spi1_clk &spi1_tx &spi1_rx &cs_gpio>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		status = "disabled";
++};
++
+ &uart2 {
+ 	status = "okay";
+ };
+

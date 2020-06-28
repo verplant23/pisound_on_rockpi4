@@ -1,0 +1,127 @@
+diff --git a/arch/arm64/boot/dts/rockchip/overlay/pisound.dts b/arch/arm64/boot/dts/rockchip/overlay/pisound.dts
+new file mode 100755
+index 000000000..60058d592
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/overlay/pisound.dts
+@@ -0,0 +1,120 @@
++/*
++ * Pisound Linux kernel module.
++ * Copyright (C) 2016-2019  Vilniaus Blokas UAB, https://blokas.io/pisound
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; version 2 of the
++ * License.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++ */
++
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++
++/ {
++	compatible = "rockchip,rk3399";
++
++	fragment@0 {
++		target-path = "/sound";
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c1>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@2 {
++		target = <&spi1>;
++		__overlay__ {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			status = "okay";
++
++			pisound_spi: pisound_spi@0{
++				compatible = "blokaslabs,pisound-spi";
++				reg = <0>;
++				spi-max-frequency = <100000>;
++			};
++		};
++	};
++
++	fragment@3 {
++		target-path = "/";
++		__overlay__ {
++			pcm5102a-codec {
++				#sound-dai-cells = <0>;
++				compatible = "ti,pcm5102a";
++				status = "okay";
++			};
++		};
++	};
++
++	fragment@4 {
++		target = <&i2s1>;
++		__overlay__ {
++			status = "okay";
++			#sound-dai-cells = <0>;
++		};
++	};
++
++	fragment@5 {
++		target = <&pinctrl>;
++		__overlay__ {
++		sound-ext-card {
++			pisound_pins: pisound_pins {
++				rockchip,pins =
++				<2 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>,
++				<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PD4 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>,
++				<4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
++			};
++		  };
++		};
++	};
++
++	fragment@6 {
++		target-path = "/sound-ext-card";
++		__overlay__ {
++			compatible = "blokaslabs,pisound";
++			i2s-controller = <&i2s1>;
++			#sound-dai-cells = <0>;
++			status = "okay";
++
++			pinctrl-names = "default";
++			pinctrl-0 = <&pisound_pins>;
++
++			osr-gpios =
++				<&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>,
++				<&gpio4 RK_PD6 GPIO_ACTIVE_HIGH>,
++				<&gpio4 RK_PA4 GPIO_ACTIVE_HIGH>;
++
++			reset-gpios =
++				<&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>, 
++				<&gpio4 RK_PD4 GPIO_ACTIVE_HIGH>;
++
++			data_available-gpios = <&gpio4 RK_PD5 GPIO_ACTIVE_HIGH>;
++
++			button-gpios = <&gpio4 RK_PC2 GPIO_ACTIVE_LOW>;
++		};
++	};
++};
+
